@@ -216,12 +216,12 @@ class ElevenLabsRealtimeHandler(AsyncStreamHandler):
             # If agent_id is configured, use it; otherwise use dynamic config
             if config.ELEVENLABS_AGENT_ID:
                 logger.info("Using pre-configured agent: %s", config.ELEVENLABS_AGENT_ID)
-                self.conversation = await self.client.conversational_ai.conversation.start_session(
+                self.conversation = await self.client.conversational_ai.conversations.start_session(
                     agent_id=config.ELEVENLABS_AGENT_ID
                 )
             else:
                 logger.info("Creating conversation with voice=%s", voice)
-                self.conversation = await self.client.conversational_ai.conversation.start_session(
+                self.conversation = await self.client.conversational_ai.conversations.start_session(
                     agent_override=conversation_config
                 )
 
