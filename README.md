@@ -13,7 +13,7 @@ tags:
 
 # Reachy Mini conversation app
 
-Conversational app for the Reachy Mini robot combining OpenAI's realtime APIs, vision pipelines, and choreographed motion libraries.
+Conversational app for the Reachy Mini robot combining ElevenLabs Conversational AI (realtime), vision pipelines, and choreographed motion libraries.
 
 ![Reachy Mini Dance](docs/assets/reachy_mini_dance.gif)
 
@@ -26,8 +26,8 @@ The app follows a layered architecture connecting the user, AI services, and rob
 </p>
 
 ## Overview
-- Real-time audio conversation loop powered by the OpenAI realtime API and `fastrtc` for low-latency streaming.
-- Vision processing uses gpt-realtime by default (when camera tool is used), with optional local vision processing using SmolVLM2 model running on-device (CPU/GPU/MPS) via `--local-vision` flag.
+- Real-time audio conversation loop powered by ElevenLabs Conversational AI and `fastrtc` for low-latency streaming.
+- Vision processing uses a local VLM (SmolVLM2) when `--local-vision` is enabled; otherwise, the camera tool returns a base64-encoded JPEG for contextual analysis.
 - Layered motion system queues primary moves (dances, emotions, goto poses, breathing) while blending speech-reactive wobble and face-tracking.
 - Async tool dispatch integrates robot motion, camera capture, and optional face-tracking capabilities through a Gradio web UI with live transcripts.
 
@@ -103,12 +103,14 @@ Some wheels (e.g. PyTorch) are large and require compatible CUDA or CPU buildsâ€
 ## Configuration
 
 1. Copy `.env.example` to `.env`.
-2. Fill in the required values, notably the OpenAI API key.
+2. Fill in the required values, notably the ElevenLabs API key.
 
 | Variable | Description |
 |----------|-------------|
-| `OPENAI_API_KEY` | Required. Grants access to the OpenAI realtime endpoint.
-| `MODEL_NAME` | Override the realtime model (defaults to `gpt-realtime`). Used for both conversation and vision (unless `--local-vision` flag is used).
+| `ELEVENLABS_API_KEY` | Required. Grants access to ElevenLabs Conversational AI.
+| `ELEVENLABS_AGENT_ID` | Optional. Use a pre-configured ElevenLabs agent; leave empty to use the app's dynamic agent configuration.
+| `ELEVENLABS_VOICE` | Optional. Voice selection for responses (default: `rachel`).
+| `ELEVENLABS_MODEL` | Optional. Conversational model name (default: `eleven_turbo_v2_5`).
 | `HF_HOME` | Cache directory for local Hugging Face downloads (only used with `--local-vision` flag, defaults to `./cache`).
 | `HF_TOKEN` | Optional token for Hugging Face models (only used with `--local-vision` flag, falls back to `huggingface-cli login`).
 | `LOCAL_VISION_MODEL` | Hugging Face model path for local vision processing (only used with `--local-vision` flag, defaults to `HuggingFaceTB/SmolVLM2-2.2B-Instruct`).
@@ -121,7 +123,7 @@ Activate your virtual environment, ensure the Reachy Mini robot (or simulator) i
 reachy-mini-conversation-app
 ```
 
-By default, the app runs in console mode for direct audio interaction. Use the `--gradio` flag to launch a web UI served locally at http://127.0.0.1:7860/ (required when running in simulation mode). With a camera attached, vision is handled by the gpt-realtime model when the camera tool is used. For local vision processing, use the `--local-vision` flag to process frames periodically using the SmolVLM2 model. Additionally, you can enable face tracking via YOLO or MediaPipe pipelines depending on the extras you installed.
+By default, the app runs in console mode for direct audio interaction. Use the `--gradio` flag to launch a web UI served locally at http://127.0.0.1:7860/ (required when running in simulation mode). With a camera attached, you can enable local vision processing via the `--local-vision` flag using the SmolVLM2 model. Additionally, you can enable face tracking via YOLO or MediaPipe pipelines depending on the extras you installed.
 
 ### CLI options
 
@@ -129,7 +131,7 @@ By default, the app runs in console mode for direct audio interaction. Use the `
 |--------|---------|-------------|
 | `--head-tracker {yolo,mediapipe}` | `None` | Select a face-tracking backend when a camera is available. YOLO is implemented locally, MediaPipe comes from the `reachy_mini_toolbox` package. Requires the matching optional extra. |
 | `--no-camera` | `False` | Run without camera capture or face tracking. |
-| `--local-vision` | `False` | Use local vision model (SmolVLM2) for periodic image processing instead of gpt-realtime vision. Requires `local_vision` extra to be installed. |
+| `--local-vision` | `False` | Use local vision model (SmolVLM2) for periodic image processing. Requires `local_vision` extra to be installed. |
 | `--gradio` | `False` | Launch the Gradio web UI. Without this flag, runs in console mode. Required when running in simulation mode. |
 | `--debug` | `False` | Enable verbose logging for troubleshooting. |
 
@@ -168,12 +170,12 @@ If you get an error like this:
   ```
 It probably means that the Reachy Mini's daemon isn't running. Install [Reachy Mini's SDK](https://github.com/pollen-robotics/reachy_mini/) and start the daemon.
 
-## LLM tools exposed to the assistant
+## Tools exposed to the assistant
 
 | Tool | Action | Dependencies |
 |------|--------|--------------|
 | `move_head` | Queue a head pose change (left/right/up/down/front). | Core install only. |
-| `camera` | Capture the latest camera frame and send it to gpt-realtime for vision analysis. | Requires camera worker; uses gpt-realtime vision by default. |
+| `camera` | Capture the latest camera frame. If local vision is enabled, frames are processed via SmolVLM2; otherwise the raw base64-encoded JPEG is returned for contextual analysis. | Requires camera worker. |
 | `head_tracking` | Enable or disable face-tracking offsets (not facial recognition - only detects and tracks face position). | Camera worker with configured head tracker. |
 | `dance` | Queue a dance from `reachy_mini_dances_library`. | Core install only. |
 | `stop_dance` | Clear queued dances. | Core install only. |

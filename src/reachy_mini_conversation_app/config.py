@@ -20,16 +20,21 @@ else:
 class Config:
     """Configuration class for the conversation app."""
 
-    # Required
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # The key is downloaded in console.py if needed
+    # Required - ElevenLabs API
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
-    # Optional
-    MODEL_NAME = os.getenv("MODEL_NAME", "gpt-realtime")
+    # Optional - ElevenLabs Configuration
+    ELEVENLABS_AGENT_ID = os.getenv("ELEVENLABS_AGENT_ID")  # Optional: use pre-configured agent
+    ELEVENLABS_VOICE = os.getenv("ELEVENLABS_VOICE", "rachel")  # Default voice
+    ELEVENLABS_MODEL = os.getenv("ELEVENLABS_MODEL", "eleven_turbo_v2_5")  # Conversation model
+    
+    # Vision and HuggingFace
     HF_HOME = os.getenv("HF_HOME", "./cache")
     LOCAL_VISION_MODEL = os.getenv("LOCAL_VISION_MODEL", "HuggingFaceTB/SmolVLM2-2.2B-Instruct")
     HF_TOKEN = os.getenv("HF_TOKEN")  # Optional, falls back to hf auth login if not set
 
-    logger.debug(f"Model: {MODEL_NAME}, HF_HOME: {HF_HOME}, Vision Model: {LOCAL_VISION_MODEL}")
+    logger.debug(f"ElevenLabs Model: {ELEVENLABS_MODEL}, Voice: {ELEVENLABS_VOICE}")
+    logger.debug(f"HF_HOME: {HF_HOME}, Vision Model: {LOCAL_VISION_MODEL}")
 
     REACHY_MINI_CUSTOM_PROFILE = os.getenv("REACHY_MINI_CUSTOM_PROFILE")
     logger.debug(f"Custom Profile: {REACHY_MINI_CUSTOM_PROFILE}")

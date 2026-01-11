@@ -20,7 +20,10 @@ dependencies = [
     #Environment variables
     "python-dotenv",
 
-    #OpenAI
+    #ElevenLabs Conversational AI
+    "elevenlabs>=1.0.0",
+
+    #OpenAI (kept for backward-compatibility and tests)
     "openai>=2.1",
 
     #Reachy mini

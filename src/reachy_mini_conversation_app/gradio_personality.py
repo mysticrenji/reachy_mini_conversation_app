@@ -98,7 +98,7 @@ class PersonalityUI:
         self.person_name_tb = gr.Textbox(label="Personality name")
         self.person_instr_ta = gr.TextArea(label="Personality instructions", lines=10)
         self.tools_txt_ta = gr.TextArea(label="tools.txt", lines=10)
-        self.voice_dropdown = gr.Dropdown(label="Voice", choices=["cedar"], value="cedar")
+        self.voice_dropdown = gr.Dropdown(label="Voice", choices=["rachel"], value="rachel")
         self.new_personality_btn = gr.Button("New personality")
         self.available_tools_cg = gr.CheckboxGroup(label="Available tools (helper)", choices=[], value=[])
         self.save_btn = gr.Button("Save personality (instructions + tools)")
@@ -132,24 +132,24 @@ class PersonalityUI:
         def _read_voice_for(name: str) -> str:
             try:
                 if name == self.DEFAULT_OPTION:
-                    return "cedar"
+                    return "rachel"
                 vf = self._resolve_profile_dir(name) / "voice.txt"
                 if vf.exists():
                     v = vf.read_text(encoding="utf-8").strip()
-                    return v or "cedar"
+                    return v or "rachel"
             except Exception:
                 pass
-            return "cedar"
+            return "rachel"
 
         async def _fetch_voices(selected: str) -> dict[str, Any]:
             try:
                 voices = await handler.get_available_voices()
                 current = _read_voice_for(selected)
                 if current not in voices:
-                    current = "cedar"
+                    current = "rachel"
                 return gr.update(choices=voices, value=current)
             except Exception:
-                return gr.update(choices=["cedar"], value="cedar")
+                return gr.update(choices=["rachel"], value="rachel")
 
         def _available_tools_for(selected: str) -> tuple[list[str], list[str]]:
             shared: list[str] = []
@@ -209,7 +209,7 @@ class PersonalityUI:
                     gr.update(value=tools_txt_val),
                     gr.update(choices=sorted(_available_tools_for(self.DEFAULT_OPTION)[0]), value=[]),
                     "Fill in a name, instructions and (optional) tools, then Save.",
-                    gr.update(value="cedar"),
+                    gr.update(value="rachel"),
                 )
             except Exception:
                 return (
@@ -232,7 +232,7 @@ class PersonalityUI:
                 target_dir.mkdir(parents=True, exist_ok=True)
                 (target_dir / "instructions.txt").write_text(instructions.strip() + "\n", encoding="utf-8")
                 (target_dir / "tools.txt").write_text(tools_text.strip() + "\n", encoding="utf-8")
-                (target_dir / "voice.txt").write_text((voice or "cedar").strip() + "\n", encoding="utf-8")
+                (target_dir / "voice.txt").write_text((voice or "rachel").strip() + "\n", encoding="utf-8")
 
                 choices = self._list_personalities()
                 value = f"user_personalities/{name_s}"

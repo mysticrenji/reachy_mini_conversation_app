@@ -58,7 +58,7 @@ async function waitForPersonalityData(timeoutMs = 15000) {
 }
 
 async function validateKey(key) {
-  const body = { openai_api_key: key };
+  const body = { elevenlabs_api_key: key };
   const resp = await fetch("/validate_api_key", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -72,8 +72,8 @@ async function validateKey(key) {
 }
 
 async function saveKey(key) {
-  const body = { openai_api_key: key };
-  const resp = await fetch("/openai_api_key", {
+  const body = { elevenlabs_api_key: key };
+  const resp = await fetch("/elevenlabs_api_key", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -171,7 +171,7 @@ async function getVoices() {
     if (!resp.ok) throw new Error("voices_failed");
     return await resp.json();
   } catch (e) {
-    return ["cedar"];
+    return ["rachel"];
   }
 }
 
@@ -390,7 +390,7 @@ async function init() {
       const data = await loadPersonality(selected);
       pInstr.value = data.instructions || "";
       pTools.value = data.tools_text || "";
-      pVoice.value = data.voice || "cedar";
+      pVoice.value = data.voice || "rachel";
       // Available tools as checkboxes
       renderToolCheckboxes(data.available_tools, data.enabled_tools);
       attachToolHandlers();
@@ -443,7 +443,7 @@ async function init() {
       pAvail.querySelectorAll('input[type="checkbox"]').forEach((el) => {
         el.checked = false;
       });
-      pVoice.value = "cedar";
+      pVoice.value = "rachel";
       pStatus.textContent = "Fill fields and click Save.";
       pStatus.className = "status";
     });
@@ -464,7 +464,7 @@ async function init() {
           name,
           instructions: pInstr.value || "",
           tools_text: pTools.value || "",
-          voice: pVoice.value || "cedar",
+          voice: pVoice.value || "rachel",
         });
         // Refresh select choices
         pSelect.innerHTML = "";
