@@ -14,7 +14,7 @@ import sys
 import time
 import asyncio
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 from pathlib import Path
 
 from fastrtc import AdditionalOutputs, audio_to_float32
@@ -24,6 +24,7 @@ from reachy_mini import ReachyMini
 from reachy_mini.media.media_manager import MediaBackend
 from reachy_mini_conversation_app.config import config
 from reachy_mini_conversation_app.elevenlabs_realtime import ElevenLabsRealtimeHandler
+from reachy_mini_conversation_app.openai_realtime import OpenaiRealtimeHandler
 from reachy_mini_conversation_app.headless_personality_ui import mount_personality_routes
 
 
@@ -49,13 +50,13 @@ class LocalStream:
 
     def __init__(
         self,
-        handler: ElevenLabsRealtimeHandler,
+        handler: Union[ElevenLabsRealtimeHandler, OpenaiRealtimeHandler],
         robot: ReachyMini,
         *,
         settings_app: Optional[FastAPI] = None,
         instance_path: Optional[str] = None,
     ):
-        """Initialize the stream with an ElevenLabs realtime handler and pipelines.
+        """Initialize the stream with a realtime handler (OpenAI or ElevenLabs) and pipelines.
 
         - ``settings_app``: the Reachy Mini Apps FastAPI to attach settings endpoints.
         - ``instance_path``: directory where per-instance ``.env`` should be stored.

@@ -45,7 +45,6 @@ def run(
     # Putting these dependencies here makes the dashboard faster to load when the conversation app is installed
     from reachy_mini_conversation_app.moves import MovementManager
     from reachy_mini_conversation_app.console import LocalStream
-    from reachy_mini_conversation_app.elevenlabs_realtime import ElevenLabsRealtimeHandler
     from reachy_mini_conversation_app.tools.core_tools import ToolDependencies
     from reachy_mini_conversation_app.audio.head_wobbler import HeadWobbler
 
@@ -126,15 +125,27 @@ def run(
     )
     logger.debug(f"Chatbot avatar images: {chatbot.avatar_images}")
 
-    handler = ElevenLabsRealtimeHandler(deps, gradio_mode=args.gradio, instance_path=instance_path)
+    # Instantiate handler based on provider selection
+    if args.provider == "openai":
+        from reachy_mini_conversation_app.openai_realtime import OpenaiRealtimeHandler
+
+        handler = OpenaiRealtimeHandler(deps, gradio_mode=args.gradio, instance_path=instance_path)
+    else:
+        from reachy_mini_conversation_app.elevenlabs_realtime import ElevenLabsRealtimeHandler
+
+        handler = ElevenLabsRealtimeHandler(deps, gradio_mode=args.gradio, instance_path=instance_path)
 
     stream_manager: gr.Blocks | LocalStream | None = None
 
     if args.gradio:
+        # Dynamic API key label and env var based on provider
+        api_key_label = "OPENAI API Key" if args.provider == "openai" else "ELEVENLABS API Key"
+        api_key_env = "OPENAI_API_KEY" if args.provider == "openai" else "ELEVENLABS_API_KEY"
+
         api_key_textbox = gr.Textbox(
-            label="ELEVENLABS API Key",
+            label=api_key_label,
             type="password",
-            value=os.getenv("ELEVENLABS_API_KEY") if not get_space() else "",
+            value=os.getenv(api_key_env) if not get_space() else "",
         )
 
         from reachy_mini_conversation_app.gradio_personality import PersonalityUI

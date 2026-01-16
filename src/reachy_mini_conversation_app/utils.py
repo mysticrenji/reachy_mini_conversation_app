@@ -11,6 +11,12 @@ def parse_args() -> Tuple[argparse.Namespace, list]:  # type: ignore
     """Parse command line arguments."""
     parser = argparse.ArgumentParser("Reachy Mini Conversation App")
     parser.add_argument(
+        "--provider",
+        choices=["openai", "elevenlabs"],
+        default="elevenlabs",
+        help="Choose AI provider (default: elevenlabs)",
+    )
+    parser.add_argument(
         "--head-tracker",
         choices=["yolo", "mediapipe", None],
         default=None,

@@ -13,7 +13,7 @@ tags:
 
 # Reachy Mini conversation app
 
-Conversational app for the Reachy Mini robot combining ElevenLabs Conversational AI (realtime), vision pipelines, and choreographed motion libraries.
+Conversational app for the Reachy Mini robot combining real-time AI (OpenAI Realtime or ElevenLabs Conversational AI), vision pipelines, and choreographed motion libraries.
 
 ![Reachy Mini Dance](docs/assets/reachy_mini_dance.gif)
 
@@ -26,7 +26,7 @@ The app follows a layered architecture connecting the user, AI services, and rob
 </p>
 
 ## Overview
-- Real-time audio conversation loop powered by ElevenLabs Conversational AI and `fastrtc` for low-latency streaming.
+- Real-time audio conversation loop powered by **OpenAI Realtime API** or **ElevenLabs Conversational AI** (selectable via `--provider` flag), using `fastrtc` for low-latency streaming.
 - Vision processing uses a local VLM (SmolVLM2) when `--local-vision` is enabled; otherwise, the camera tool returns a base64-encoded JPEG for contextual analysis.
 - Layered motion system queues primary moves (dances, emotions, goto poses, breathing) while blending speech-reactive wobble and face-tracking.
 - Async tool dispatch integrates robot motion, camera capture, and optional face-tracking capabilities through a Gradio web UI with live transcripts.
@@ -103,17 +103,37 @@ Some wheels (e.g. PyTorch) are large and require compatible CUDA or CPU builds�
 ## Configuration
 
 1. Copy `.env.example` to `.env`.
-2. Fill in the required values, notably the ElevenLabs API key.
+2. Fill in the required API key based on your chosen provider.
+
+### Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `ELEVENLABS_API_KEY` | Required. Grants access to ElevenLabs Conversational AI.
+| `OPENAI_API_KEY` | Required when using `--provider openai`. Grants access to OpenAI Realtime API.
+| `ELEVENLABS_API_KEY` | Required when using `--provider elevenlabs` (default). Grants access to ElevenLabs Conversational AI.
 | `ELEVENLABS_AGENT_ID` | Optional. Use a pre-configured ElevenLabs agent; leave empty to use the app's dynamic agent configuration.
 | `ELEVENLABS_VOICE` | Optional. Voice selection for responses (default: `rachel`).
 | `ELEVENLABS_MODEL` | Optional. Conversational model name (default: `eleven_turbo_v2_5`).
 | `HF_HOME` | Cache directory for local Hugging Face downloads (only used with `--local-vision` flag, defaults to `./cache`).
 | `HF_TOKEN` | Optional token for Hugging Face models (only used with `--local-vision` flag, falls back to `huggingface-cli login`).
 | `LOCAL_VISION_MODEL` | Hugging Face model path for local vision processing (only used with `--local-vision` flag, defaults to `HuggingFaceTB/SmolVLM2-2.2B-Instruct`).
+
+### Provider Comparison
+
+| Feature | OpenAI Realtime | ElevenLabs Conversational AI |
+|---------|-----------------|------------------------------|
+| **Audio Quality** | 24kHz PCM16 | 16kHz PCM16 |
+| **Vision Support** | Built-in multimodal (GPT-4o) | External (base64 images) |
+| **Interruption** | ✅ Server-side VAD | ✅ Server-side VAD |
+| **Tool Calling** | ✅ Function calling | ✅ Tool execution |
+| **Latency** | ~200-300ms | ~200-300ms |
+| **API Style** | WebSocket | Conversational SDK |
+| **Voices** | Limited selection | 15+ voices |
+| **Pricing Model** | Per token | Per character |
+
+**Recommendation**: 
+- Use **OpenAI** for multimodal vision processing and higher audio quality
+- Use **ElevenLabs** for more natural voice options and character-based pricing
 
 ## Running the app
 
@@ -129,6 +149,7 @@ By default, the app runs in console mode for direct audio interaction. Use the `
 
 | Option | Default | Description |
 |--------|---------|-------------|
+| `--provider {openai,elevenlabs}` | `elevenlabs` | Select the AI provider for conversation. OpenAI uses Realtime API (24kHz, multimodal vision), ElevenLabs uses Conversational AI (16kHz, external vision). |
 | `--head-tracker {yolo,mediapipe}` | `None` | Select a face-tracking backend when a camera is available. YOLO is implemented locally, MediaPipe comes from the `reachy_mini_toolbox` package. Requires the matching optional extra. |
 | `--no-camera` | `False` | Run without camera capture or face tracking. |
 | `--local-vision` | `False` | Use local vision model (SmolVLM2) for periodic image processing. Requires `local_vision` extra to be installed. |
@@ -137,6 +158,19 @@ By default, the app runs in console mode for direct audio interaction. Use the `
 
 
 ### Examples
+
+- Run with OpenAI Realtime API:
+
+  ```bash
+  reachy-mini-conversation-app --provider openai
+  ```
+
+- Run with ElevenLabs (default):
+
+  ```bash
+  reachy-mini-conversation-app --provider elevenlabs
+  ```
+
 - Run on hardware with MediaPipe face tracking:
 
   ```bash
